@@ -1,0 +1,49 @@
+STEP 7 — ADMIN RFID LOGIN SETUP
+================================
+
+1. Open phpMyAdmin.
+2. Select the database:
+   workforce_management
+3. Open the SQL tab.
+4. Run:
+   database_step7_rfid_setup.sql
+
+The RFID mapping created is:
+   3219410377 -> 26011001 -> admin@holidaytravels.com -> admin
+
+5. Make sure the project contains:
+   api/auth/rfid-login.php
+
+6. Replace your current:
+   scripts/login.js
+   with the Step 7 version in this ZIP.
+
+7. Restart Apache.
+
+TEST:
+-----
+First login from a device that has NOT been trusted:
+   Scan the Admin RFID:
+   3219410377
+
+Expected:
+   Admin RFID
+      -> Gmail 6-digit verification
+      -> enter code
+      -> admin.php
+
+After the same device is trusted for 24 hours:
+   Scan 3219410377 again.
+
+Expected:
+   Admin RFID
+      -> admin.php
+
+There is no RFID/scanner UI added to login.php.
+
+NOTES:
+------
+- The normal email/password login remains unchanged.
+- The RFID shortcut only accepts an RFID whose linked account role is "admin".
+- Manager/Employee RFID scans do not grant login access through this shortcut.
+- The existing trusted_devices table controls the 24-hour window.

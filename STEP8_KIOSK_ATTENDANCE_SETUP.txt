@@ -1,0 +1,40 @@
+STEP 8 — KIOSK RFID → MYSQL ATTENDANCE
+
+What changed
+------------
+1. Added api/kiosk/scan.php.
+2. kiosk-scanner-ui.php now sends physical RFID scans to the PHP endpoint.
+3. PHP validates the RFID against rfid_cards + employees in MySQL.
+4. Approved scans are written to kiosk_log_entries.
+5. First approved scan today records attendance_records.time_in.
+6. Second approved scan today records attendance_records.time_out.
+7. A third scan does not create another attendance row; it logs the approved kiosk scan and reports that today's attendance is already complete.
+8. Existing kiosk UI and navigation are preserved.
+
+Required database
+-----------------
+Database: workforce_management
+
+The existing tables required by Step 8 are:
+- rfid_cards
+- employees
+- attendance_records
+- kiosk_log_entries
+
+Test RFID cards from the current database
+------------------------------------------
+Admin:   3219410377 -> 26011001
+Manager: 3219246537 -> 26011002
+Employee:3215545033 -> 26011003
+
+Testing
+-------
+1. Start Apache and MySQL in XAMPP.
+2. Open kiosk-scanner-ui.php from the Workforce Management project.
+3. Scan a registered RFID card.
+4. Verify a row appears in kiosk_log_entries.
+5. Verify attendance_records gets time_in on the first scan.
+6. Scan the same RFID again.
+7. Verify the same attendance row gets time_out.
+
+No SQL schema change is required for Step 8.

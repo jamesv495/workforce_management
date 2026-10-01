@@ -1,0 +1,112 @@
+STEP 6 - GMAIL 6-DIGIT MFA + 24-HOUR TRUSTED DEVICE
+
+A. Install PHPMailer
+--------------------
+From the Workforce Management project folder:
+
+    composer install
+
+This installs the PHPMailer dependency declared in composer.json.
+
+
+B. Configure the Gmail sender
+-----------------------------
+The system sends OTP codes through smtp.gmail.com using the sender account.
+
+For deployment, set environment variables:
+
+    WFM_MAIL_USERNAME=your-sender@gmail.com
+    WFM_MAIL_PASSWORD=your-gmail-app-password
+    WFM_MAIL_FROM=your-sender@gmail.com
+    WFM_MAIL_FROM_NAME=Holiday Travelers Workforce Management
+
+For local XAMPP testing, create:
+
+    api/config/mail.local.php
+
+with:
+
+    <?php
+    return [
+        'username' => 'your-sender@gmail.com',
+        'password' => 'your-gmail-app-password',
+        'from_email' => 'your-sender@gmail.com',
+        'from_name' => 'Holiday Travelers Workforce Management'
+    ];
+
+The file is ignored by .gitignore.
+
+
+C. Recipient address
+--------------------
+The OTP is sent to the email stored in:
+
+    accounts.email
+
+Therefore each account must have an email address that can receive the
+verification message.
+
+
+D. Login behavior
+-----------------
+First login on a browser/device:
+
+    Email + Password
+            ↓
+    Password verified
+            ↓
+    New/untrusted device
+            ↓
+    Six-digit Gmail OTP
+            ↓
+    Code verified
+            ↓
+    Device trusted for 24 hours
+            ↓
+    Role-based dashboard
+
+
+Next login from the same browser/device before 24 hours:
+
+    Email + Password
+            ↓
+    Trusted device found
+            ↓
+    Role-based dashboard
+
+
+After the 24-hour trusted period expires:
+
+    Email + Password
+            ↓
+    Gmail OTP required again
+
+
+E. Database
+-----------
+Step 6 uses the existing Step 2 tables:
+
+    otp_challenges
+    trusted_devices
+
+No additional SQL table is required.
+
+
+F. OTP rules
+------------
+- Six digits
+- Randomly generated
+- Stored as a password hash
+- Expires after 10 minutes
+- Maximum 5 incorrect attempts
+- Previous active code is invalidated when a new code is sent
+
+
+G. Trusted-device rules
+-----------------------
+- Random device token
+- Only its SHA-256 hash is stored in MySQL
+- Browser receives an HttpOnly cookie
+- Database expiration is exactly 24 hours from successful OTP verification
+- Logging out does NOT delete the trusted device
+- Clearing the browser cookie causes the next login to require OTP again
